@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -20,25 +21,26 @@ func main() {
 }
 
 func newTest() {
+	delay := "10"
 	addrs := []request{}
-	addrs = append(addrs, request{`http://10.66.9.7:8017/10.66.9.200/input/1/0`,
-		[]byte("{\r\n  \"input\": \"1:0\"\r\n}"),
+	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/0`,
+		[]byte("{\"input\":\"1:0\"}"),
 	})
-	addrs = append(addrs, request{`http://10.66.9.7:8017/10.66.9.200/input/1/2`,
-		[]byte("{\r\n  \"input\": \"1:2\"\r\n}"),
+	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/2`,
+		[]byte("{\"input\":\"1:2\"}"),
 	})
-	addrs = append(addrs, request{`http://10.66.9.7:8017/10.66.9.200/input/3/1`,
-		[]byte("{\r\n  \"input\": \"3:1\"\r\n}"),
+	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/2/1`,
+		[]byte("{\"input\":\"2:1\"}"),
 	})
-	addrs = append(addrs, request{`http://10.66.9.7:8017/10.66.9.200/input/3/0`,
-		[]byte("{\r\n  \"input\": \"3:0\"\r\n}"),
+	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/0`,
+		[]byte("{\"input\":\"1:0\"}"),
 	})
-	addrs = append(addrs, request{`http://10.66.9.7:8017/10.66.9.200/input/3/2`,
-		[]byte("{\r\n  \"input\": \"3:2\"\r\n}"),
+	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/2`,
+		[]byte("{\"input\":\"1:2\"}"),
 	})
 
-	interval := 1000
-	count := 10
+	interval := 1
+	count := 100
 	concurrent := 8
 	wg := sync.WaitGroup{}
 
@@ -57,7 +59,7 @@ func newMakeRequests(addr []request, interval int, count int, id int, wg *sync.W
 	for i := 0; i < count; i++ {
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 
-		cur := addr[i%len(addr)]
+		cur := addr[rand.Intn(len(addr))]
 		resp, err := http.Get(cur.Address)
 		if err != nil {
 			log.Printf(color.HiRedString("[%v] Error on request: %v", id, err.Error()))
@@ -77,8 +79,8 @@ func newMakeRequests(addr []request, interval int, count int, id int, wg *sync.W
 
 		//check the response
 		if !compareSlices(body, cur.ExpectedResponse) {
-			log.Printf(color.HiRedString("[%v] Incorrect response %v", id, body))
-			log.Printf(color.HiRedString("[%v]  Expected response %v", id, cur.ExpectedResponse))
+			log.Printf(color.HiRedString("[%v] Incorrect response %s", id, body))
+			log.Printf(color.HiRedString("[%v]  Expected response %s", id, cur.ExpectedResponse))
 			continue
 		}
 
