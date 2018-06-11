@@ -21,27 +21,35 @@ func main() {
 }
 
 func newTest() {
-	delay := "10"
 	addrs := []request{}
-	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/0`,
-		[]byte("{\"input\":\"1:0\"}"),
+	/*
+		delay := "10"
+		addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.176:80/cws/10.66.76.171/input/routeInputToOutput/1/0`,
+			[]byte("{\"input\":\"1:0\"}"),
+		})
+		addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.176:80/cws/10.66.76.171/input/routeInputToOutput/1/2`,
+			[]byte("{\"input\":\"1:2\"}"),
+		})
+		addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.176:80/cws/10.66.76.171/input/routeInputToOutput/0/1`,
+			[]byte("{\"input\":\"0:1\"}"),
+		})
+		addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.176:80/cws/10.66.76.171/input/routeInputToOutput/1/0`,
+			[]byte("{\"input\":\"1:0\"}"),
+		})
+		addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.176:80/cws/10.66.76.171/input/routeInputToOutput/1/2`,
+			[]byte("{\"input\":\"1:2\"}"),
+		})
+	*/
+	addrs = append(addrs, request{`http://localhost:8005/10.5.34.48/input/current`,
+		[]byte("{\"input\":\"digital3\"}"),
 	})
-	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/2`,
-		[]byte("{\"input\":\"1:2\"}"),
-	})
-	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/2/1`,
-		[]byte("{\"input\":\"2:1\"}"),
-	})
-	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/0`,
-		[]byte("{\"input\":\"1:0\"}"),
-	})
-	addrs = append(addrs, request{`http://10.5.34.21:8018/metered/` + delay + `/10.66.76.177:80/cws/10.66.76.172/input/routeInputToOutput/1/2`,
-		[]byte("{\"input\":\"1:2\"}"),
+	addrs = append(addrs, request{`http://localhost:8005/10.5.34.48/power/status`,
+		[]byte("{\"power\":\"standby\"}"),
 	})
 
-	interval := 1
-	count := 100
-	concurrent := 8
+	interval := 500
+	count := 1000000000000
+	concurrent := 3
 	wg := sync.WaitGroup{}
 
 	wg.Add(concurrent)
@@ -84,7 +92,7 @@ func newMakeRequests(addr []request, interval int, count int, id int, wg *sync.W
 			continue
 		}
 
-		log.Printf(color.HiGreenString("[%v] ok.", id))
+		log.Printf(color.HiGreenString("[%v] ok - resp: %s", id, body))
 		resp.Body.Close()
 	}
 	log.Printf(color.HiGreenString("[%v] Done.", id))
